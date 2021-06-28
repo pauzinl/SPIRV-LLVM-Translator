@@ -592,6 +592,11 @@ SPIRVFunction *LLVMToSPIRVBase::transFunctionDecl(Function *F) {
   if (BM->isAllowedToUseExtension(ExtensionID::SPV_INTEL_fpga_buffer_location))
     BufferLocation = ((*F).getMetadata("kernel_arg_buffer_location"));
 
+  // Translate runtime_aligned metadata
+  MDNode *RuntimeAligned = nullptr;
+  if (BM->isAllowedToUseExtension(ExtensionID::SPV_INTEL_runtime_aligned))
+    RuntimeAligned = ((*F).getMetadata("kernel_arg_runtime_aligned"));
+
   auto Attrs = F->getAttributes();
 
   for (Function::arg_iterator I = F->arg_begin(), E = F->arg_end(); I != E;
@@ -629,6 +634,14 @@ SPIRVFunction *LLVMToSPIRVBase::transFunctionDecl(Function *F) {
         LocID = getMDOperandAsInt(BufferLocation, ArgNo);
       if (LocID >= 0)
         BA->addDecorate(DecorationBufferLocationINTEL, LocID);
+    }
+    if (RuntimeAligned && I->getType()->isPointerTy()) {
+      int LocID = 0;
+      if (!isa<MDString>(RuntimeAligned->getOperand(ArgNo)) &&
+          !isa<MDNode>(RuntimeAligned->getOperand(ArgNo)))
+        LocID = getMDOperandAsInt(RuntimeAligned, ArgNo);
+      if (LocID > 0)
+        BA->addDecorate(internal::DecorationRuntimeAlignedINTEL, LocID);
     }
   }
   if (Attrs.hasAttribute(AttributeList::ReturnIndex, Attribute::ZExt))

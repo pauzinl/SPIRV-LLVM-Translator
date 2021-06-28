@@ -173,6 +173,7 @@ template <> inline void SPIRVMap<Decoration, std::string>::init() {
   add(internal::DecorationInitiationIntervalINTEL, "InitiationIntervalINTEL");
   add(internal::DecorationMaxConcurrencyINTEL, "MaxConcurrencyINTEL");
   add(internal::DecorationPipelineEnableINTEL, "PipelineEnableINTEL");
+  add(internal::DecorationRuntimeAlignedINTEL, "RuntimeAlignedINTEL");
   add(DecorationMax, "Max");
 }
 SPIRV_DEF_NAMEMAP(Decoration, SPIRVDecorationNameMap)
@@ -528,6 +529,8 @@ template <> inline void SPIRVMap<Capability, std::string>::init() {
   add(internal::CapabilityFPGAInvocationPipeliningAttributesINTEL,
       "FPGAInvocationPipeliningAttributesINTEL");
   add(internal::CapabilityTokenTypeINTEL, "TokenTypeINTEL");
+  add(internal::CapabilityRuntimeAlignedAttributeINTEL,
+      "RuntimeAlignedAttributeINTEL");
 }
 SPIRV_DEF_NAMEMAP(Capability, SPIRVCapabilityNameMap)
 

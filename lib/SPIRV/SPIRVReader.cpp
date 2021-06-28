@@ -191,6 +191,27 @@ static void addBufferLocationMetadata(
                     MDNode::get(*Context, ValueVec));
 }
 
+static void addRuntimeAlignedMetadata(
+    LLVMContext *Context, SPIRVFunction *BF, llvm::Function *Fn,
+    std::function<Metadata *(SPIRVFunctionParameter *)> Func) {
+  std::vector<Metadata *> ValueVec;
+  bool DecorationFound = false;
+  BF->foreachArgument([&](SPIRVFunctionParameter *Arg) {
+    if (Arg->getType()->isTypePointer() &&
+        Arg->hasDecorate(internal::DecorationRuntimeAlignedINTEL)) {
+      DecorationFound = true;
+      ValueVec.push_back(Func(Arg));
+    } else {
+      llvm::Metadata *DefaultNode = ConstantAsMetadata::get(
+          ConstantInt::get(Type::getInt1Ty(*Context), 0));
+      ValueVec.push_back(DefaultNode);
+    }
+  });
+  if (DecorationFound)
+    Fn->setMetadata("kernel_arg_runtime_aligned",
+                    MDNode::get(*Context, ValueVec));
+}
+
 Value *SPIRVToLLVM::getTranslatedValue(SPIRVValue *BV) {
   auto Loc = ValueMap.find(BV);
   if (Loc != ValueMap.end())
@@ -4268,6 +4289,16 @@ bool SPIRVToLLVM::transOCLMetadata(SPIRVFunction *BF) {
 
     return ConstantAsMetadata::get(
         ConstantInt::get(Type::getInt32Ty(*Context), Literals[0]));
+  });
+  // Generate metadata for kernel_arg_runtime_aligned
+  addRuntimeAlignedMetadata(Context, BF, F, [=](SPIRVFunctionParameter *Arg) {
+    auto Literals =
+        Arg->getDecorationLiterals(internal::DecorationRuntimeAlignedINTEL);
+    assert(Literals.size() == 1 &&
+           "RuntimeAlignedINTEL decoration shall have 1 ID literal");
+
+    return ConstantAsMetadata::get(
+        ConstantInt::get(Type::getInt1Ty(*Context), Literals[0]));
   });
   return true;
 }
