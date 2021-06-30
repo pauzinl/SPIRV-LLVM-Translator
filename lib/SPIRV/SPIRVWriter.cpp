@@ -592,7 +592,8 @@ SPIRVFunction *LLVMToSPIRVBase::transFunctionDecl(Function *F) {
   if (BM->isAllowedToUseExtension(ExtensionID::SPV_INTEL_fpga_buffer_location))
     BufferLocation = ((*F).getMetadata("kernel_arg_buffer_location"));
 
-  // Translate runtime_aligned metadata
+  // Translate runtime_aligned metadata if it's attached to the translated
+  // function declaration
   MDNode *RuntimeAligned = nullptr;
   if (BM->isAllowedToUseExtension(ExtensionID::SPV_INTEL_runtime_aligned))
     RuntimeAligned = ((*F).getMetadata("kernel_arg_runtime_aligned"));
@@ -636,6 +637,9 @@ SPIRVFunction *LLVMToSPIRVBase::transFunctionDecl(Function *F) {
         BA->addDecorate(DecorationBufferLocationINTEL, LocID);
     }
     if (RuntimeAligned && I->getType()->isPointerTy()) {
+      // Order of integer numbers in MD node follows the order of function
+      // parameters on which we shall attach the appropriate decoration. Add
+      // decoration only if MD value is 1.
       int LocID = 0;
       if (!isa<MDString>(RuntimeAligned->getOperand(ArgNo)) &&
           !isa<MDNode>(RuntimeAligned->getOperand(ArgNo)))
