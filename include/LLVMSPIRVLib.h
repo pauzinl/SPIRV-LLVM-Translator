@@ -137,6 +137,17 @@ using SpecConstInfoTy = std::pair<uint32_t, uint32_t>;
 bool getSpecConstInfo(std::istream &IS,
                       std::vector<SpecConstInfoTy> &SpecConstInfo);
 
+/// \addcomment
+///
+/// \return true if succeeds.
+struct SPIRVHeaderData {
+  std::uint32_t memoryModel = 0x7fffffff; // MemoryModelMax
+  std::uint32_t version = 0;
+  std::vector<std::uint32_t> capabilities;
+};
+bool readSPIRVHeader(SPIRVHeaderData &result,
+                     std::istream &IS, std::string &ErrMsg);
+
 /// \brief Convert a SPIRVModule into LLVM IR.
 /// \returns null on failure.
 std::unique_ptr<Module>

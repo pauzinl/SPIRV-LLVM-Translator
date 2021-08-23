@@ -72,6 +72,7 @@ public:
 
   void setScope(SPIRVEntry *);
   bool getWordCountAndOpCode();
+  bool getSPIRVWordAfterOpCode(SPIRVWord &word);
   SPIRVEntry *getEntry();
   void validate() const;
   void ignore(size_t N);

@@ -222,6 +222,41 @@ bool SPIRVDecoder::getWordCountAndOpCode() {
   return true;
 }
 
+bool SPIRVDecoder::getSPIRVWordAfterOpCode(SPIRVWord &word) {
+  if (IS.eof()) {
+    word = -1;
+    SPIRVDBG(spvdbgs() << "[SPIRVDecoder] getSPIRVWordAfterOpCode EOF "
+                       << word << '\n');
+    return false;
+  }
+#ifdef _SPIRV_SUPPORT_TEXT_FMT
+  if (SPIRVUseTextFormat) {
+    *this >> word;
+    assert(!IS.bad() && "SPIRV stream is bad");
+    if (IS.fail()) {
+      word = -1;
+      SPIRVDBG(spvdbgs() << "[SPIRVDecoder] getSPIRVWordAfterOpCode FAIL "
+                         << word << '\n');
+      return false;
+    }
+  } else {
+#endif
+    *this >> word;
+#ifdef _SPIRV_SUPPORT_TEXT_FMT
+  }
+#endif
+    assert(!IS.bad() && "SPIRV stream is bad");
+    if (IS.fail()) {
+      word = -1;
+      SPIRVDBG(spvdbgs() << "[SPIRVDecoder] getSPIRVWordAfterOpCode FAIL "
+                         << word << '\n');
+      return false;
+    }
+    SPIRVDBG(spvdbgs() << "[SPIRVDecoder] getWordCountAndOpCode "
+                       << word << '\n');
+    return true;
+}
+
 SPIRVEntry *SPIRVDecoder::getEntry() {
   if (WordCount == 0 || OpCode == OpNop)
     return nullptr;

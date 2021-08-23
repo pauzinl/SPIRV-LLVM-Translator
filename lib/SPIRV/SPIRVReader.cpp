@@ -4365,6 +4365,53 @@ bool llvm::getSpecConstInfo(std::istream &IS,
   return !IS.bad();
 }
 
+bool readSPIRVHeader(SPIRVHeaderData &result,
+                     std::istream &IS, std::string &ErrMsg) {
+  std::unique_ptr<SPIRVModule> BM(SPIRVModule::createSPIRVModule());
+  BM->setAutoAddExtensions(false);
+  SPIRVDecoder D(IS, *BM);
+  SPIRVWord Magic;
+  SPIRVWord buffer;
+  bool success;
+  D >> Magic;
+  if (!BM->getErrorLog().checkError(Magic == MagicNumber, SPIRVEC_InvalidModule,
+                                    "invalid magic number")) {
+    ErrMsg = "invalid magic number";
+    return false;
+  }
+
+  D >> buffer;
+  result.version = buffer;
+  D.ignore(3);
+
+  while (D.getWordCountAndOpCode()) {
+    success = 0;
+    switch(D.OpCode) {
+      case spv::OpMemoryModel:
+        D.ignore(1);
+        success = D.getSPIRVWordAfterOpCode(buffer);
+        if (success)
+          result.memoryModel = buffer;
+        break;
+      case spv::OpCapability:
+        success = D.getSPIRVWordAfterOpCode(buffer);
+        if(success)
+          result.capabilities.push_back(buffer);
+        break;
+
+      default:
+        if(spv::OpSource == D.OpCode || spv::OpName == D.OpCode ||
+           spv::OpMemberName == D.OpCode || spv::OpDecorate == D.OpCode ||
+           spv::OpMemberDecorate == D.OpCode ||spv::OpFunction == D.OpCode) {
+          return true;
+        } else {
+          D.ignoreInstruction();
+        }
+    }
+  }
+  return true;
+}
+
 // clang-format off
 const StringSet<> SPIRVToLLVM::BuiltInConstFunc {
   "convert", "get_work_dim", "get_global_size", "sub_group_ballot_bit_count",
