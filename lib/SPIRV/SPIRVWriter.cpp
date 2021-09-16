@@ -4106,17 +4106,36 @@ LLVMToSPIRVBase::transBuiltinToInstWithoutDecoration(Op OC, CallInst *CI,
 
     Type *ResTy = CI->getType();
     SPIRVValue *Input =
-        transValue(CI->getOperand(0) /* A - integer input of any width */, BB);
+        transValue(CI->getOperand(1) /* A - integer input of any width */, BB);
 
     std::vector<Value *> Operands = {
-        CI->getOperand(1) /* S - bool value, indicator of signedness */,
-        CI->getOperand(2) /* I - location of the fixed-point of the input */,
-        CI->getOperand(3) /* rI - location of the fixed-point of the result*/,
-        CI->getOperand(4) /* Quantization mode */,
-        CI->getOperand(5) /* Overflow mode */};
+        CI->getOperand(2) /* S - bool value, indicator of signedness */,
+        CI->getOperand(3) /* I - location of the fixed-point of the input */,
+        CI->getOperand(4) /* rI - location of the fixed-point of the result*/,
+        CI->getOperand(5) /* Quantization mode */,
+        CI->getOperand(6) /* Overflow mode */};
     std::vector<SPIRVWord> Literals;
     for (auto *O : Operands) {
       Literals.push_back(cast<llvm::ConstantInt>(O)->getZExtValue());
+    }
+
+    if (ResTy->isVoidTy()) {
+      ResTy = CI->getOperand(0)->getType();//PointerTy
+    //  if(cast<isPointerTy>(CI->getOperand(0)->getType() == )
+      PointerType *RTY = cast<PointerType>(ResTy);
+     // if (ResTy->isPointerTy())
+     // {
+     //    RTY = RTY->getElementType();
+     // } 
+      // add assert sret hasStructRetAttr()
+//        ResTy = CI->getOperand(0)->getType()->getArrayElementType();
+          //->getElementType();
+      ResTy = RTY->getElementType();
+ /*     if (ResTy->getIntegerBitWidth() > 64) {
+        for (size_t i = 0; i < ResTy->getIntegerBitWidth() / 32; i++)
+          Literals.push_back(42);
+      }
+      Literals.push_back(43); */
     }
 
     return BM->addFixedPointIntelInst(OC, transType(ResTy), Input, Literals,

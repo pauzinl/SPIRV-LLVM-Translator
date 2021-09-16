@@ -109,11 +109,11 @@ public:
 
   void setType(SPIRVType *Ty) {
     Type = Ty;
-    assert(!Ty || !Ty->isTypeVoid() || OpCode == OpFunction);
-    if (Ty && (!Ty->isTypeVoid() || OpCode == OpFunction))
+//    assert(!Ty || !Ty->isTypeVoid() || OpCode == OpFunction);
+//    if (Ty && (!Ty->isTypeVoid() || OpCode == OpFunction))
       setHasType();
-    else
-      setHasNoType();
+//    else
+//      setHasNoType();
   }
 
   SPIRVCapVec getRequiredCapability() const override {

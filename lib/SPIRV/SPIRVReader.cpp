@@ -2494,8 +2494,13 @@ Value *SPIRVToLLVM::transValueWithoutDecoration(SPIRVValue *BV, Function *F,
 static std::string getFuncAPIntSuffix(const Type *RetTy, const Type *In1Ty,
                                       const Type *In2Ty = nullptr) {
   std::stringstream Suffix;
+  if (RetTy->isPointerTy()) {// In case return type > 64 bit
+    Suffix << ".i" << sizeof(RetTy) * 8 << ".i" << In1Ty->getIntegerBitWidth();
+  } else {
+
   Suffix << ".i" << RetTy->getIntegerBitWidth() << ".i"
          << In1Ty->getIntegerBitWidth();
+  }
   if (In2Ty)
     Suffix << ".i" << In2Ty->getIntegerBitWidth();
   return Suffix.str();
@@ -2519,11 +2524,22 @@ CallInst *SPIRVToLLVM::transFixedPointInst(SPIRVInstruction *BI,
   IntegerType *Int32Ty = IntegerType::get(*Context, 32);
   IntegerType *Int1Ty = IntegerType::get(*Context, 1);
 
-  SmallVector<Type *, 7> ArgTys = {InTy,    Int1Ty,  Int32Ty,
+  IRBuilder<> Builder(BB);
+  FunctionType *FT;
+  if (RetTy->getIntegerBitWidth() > 64) {
+    SmallVector<Type *, 8> ArgTys = {RetTy,  InTy,    Int1Ty,  Int32Ty,
+                                     Int32Ty, Int32Ty, Int32Ty};
+   // Type *RTY = transType(BI->getType());
+   // RTY->ID = llvm::Type::VoidTyID; need to make void return type
+    FT = FunctionType::get(Builder.getVoidTy(), ArgTys, false);
+  } else {
+    SmallVector<Type *, 7> ArgTys = {InTy,    Int1Ty,  Int32Ty,
                                    Int32Ty, Int32Ty, Int32Ty};
-  FunctionType *FT = FunctionType::get(RetTy, ArgTys, false);
+    FT = FunctionType::get(RetTy, ArgTys, false);
+  }
 
   Op OpCode = Inst->getOpCode();
+  std::cout << OpCode << std::endl;
   std::string FuncName =
       SPIRVFixedPointIntelMap::rmap(OpCode) + getFuncAPIntSuffix(RetTy, InTy);
 
@@ -2537,7 +2553,16 @@ CallInst *SPIRVToLLVM::transFixedPointInst(SPIRVInstruction *BI,
   // Words contain:
   // In<id> Literal S Literal I Literal rI Literal Q Literal O
   auto Words = Inst->getOpWords();
+  for (auto i :Words)
+    std::cout << i << "  ";
+  std::cout << std::endl << RetTy << std::endl;
+ // Constant *_c = Constant::getIntegerValue(RetTy, cast<IntegerType>(RetTy)->getMask());
+ // std::vector<SPIRVValue *> zzz = BI->getOperands();
   std::vector<Value *> Args = {
+//    cast<IntegerType>(RetTy)->getCallee()
+   // Builder.CreatePointerBitCastOrAddrSpaceCast(FCallee.getCallee(), RetTy, ""),
+    Builder.CreateBitOrPointerCast(FCallee.getCallee(), RetTy, ""),
+
       transValue(Inst->getOperand(0), BB->getParent(), BB) /* A - input */,
       ConstantInt::get(Int1Ty, Words[1]) /* S - indicator of signedness */,
       ConstantInt::get(Int32Ty,
