@@ -1945,7 +1945,8 @@ bool postProcessBuiltinsReturningStruct(Module *M, bool IsCpp) {
     if (F.hasName() && F.isDeclaration()) {
       LLVM_DEBUG(dbgs() << "[postProcess sret] " << F << '\n');
       if (F.getReturnType()->isStructTy() &&
-          oclIsBuiltin(F.getName(), DemangledName, IsCpp)) {
+          oclIsBuiltin(F.getName(), DemangledName, IsCpp) ||
+             F.getReturnType()->getIntegerBitWidth() > 64) {
         if (!postProcessBuiltinReturningStruct(&F))
           return false;
       }
