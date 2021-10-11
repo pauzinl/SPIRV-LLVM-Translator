@@ -4139,6 +4139,26 @@ LLVMToSPIRVBase::transBuiltinToInstWithoutDecoration(Op OC, CallInst *CI,
       assert(ResTy->isVoidTy() && "Return type is not void");
       ResTy = cast<PointerType>(OpItr->getType())->getElementType();
       OpItr++;
+
+    SPIRVValue *Input =
+        transValue(*OpItr++ /* A - integer input of any width */, BB);
+
+    std::vector<SPIRVWord> Literals;
+    std::transform(OpItr, OpEnd, std::back_inserter(Literals), [](auto *O) {
+      return cast<llvm::ConstantInt>(O)->getZExtValue();
+    });
+
+    auto *Tmp = BM->addFixedPointIntelInst(OC, transType(ResTy), Input, Literals,
+                                      BB);
+      if (!CI->hasStructRetAttr())
+        return Tmp;
+
+     // SPIRVType *SPRetTy = transType(ResTy->getPointerElementType());
+    //  auto *SPI = SPIRVInstTemplateBase::create(OC);
+      std::vector<SPIRVWord> Mem;
+
+      return BM->addStoreInst(transValue(CI->getArgOperand(0), BB), Tmp, Mem,
+                              BB);
     }
 
     SPIRVValue *Input =

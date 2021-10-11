@@ -2557,10 +2557,6 @@ Value *SPIRVToLLVM::transFixedPointInst(SPIRVInstruction *BI,
  // add check for integer type
   if (RetTy->getIntegerBitWidth() > 64) {
   auto Words = Inst->getOpWords();
-//getReturnId
-//    llvm::Value *RetValue = transValue(BI->getValue(605), BB->getParent(), BB);
-//
-//    llvm::PointerType *RetPtrTy = llvm::PointerType::get(RetValue->getType(), SPIRAS_Generic);
     llvm::PointerType *RetPtrTy = llvm::PointerType::get(RetTy, SPIRAS_Generic);
 
     SmallVector<Type *, 8> ArgTys = {RetPtrTy,
@@ -2568,22 +2564,16 @@ Value *SPIRVToLLVM::transFixedPointInst(SPIRVInstruction *BI,
                                    Int32Ty, Int32Ty, Int32Ty};
     FunctionType *FT = FunctionType::get(Builder.getVoidTy(), ArgTys, false);
     FCallee = M->getOrInsertFunction(FuncName, FT);
-/*     Value *Idxs[] = {
-       ConstantInt::get(Type::getInt32Ty(*Context), 0),
-       ConstantInt::get(Type::getInt32Ty(*Context), 0)
-     };
-    auto Zero = ConstantInt::getNullValue(Type::getInt32Ty(*Context));
-     Value *Index[] = {Zero};
-     Value *Ret = GetElementPtrInst::CreateInBounds(RetTy, Alloca, Index);*/
-
 //    llvm::Value *RetValue = transValue(BI->getValue(605), BB->getParent(), BB);
-//   Value *Alloca = new AllocaInst(RetTy, SPIRAS_Generic,
  //     transValue(BI->getValue(605), BB->getParent(), BB), "", BB);
-  Value *Alloca = new AllocaInst(RetTy, SPIRAS_Generic, "", BB);
+
+//    Value *Alloca = new AllocaInst(RetTy, SPIRAS_Generic, "", BB);
+  Value *Alloca = new AllocaInst(RetPtrTy, SPIRAS_Generic, "", BB);
+
+ Value *RetCast = new AddrSpaceCastInst(Alloca, RetPtrTy, "", BB);
+//  Value *Alloca = new AllocaInst(RetTy,
   std::vector<Value *> AArgs = {
 //    PointerType::get(RetValue->getType(), SPIRAS_Generic,
-//        RetValue->stripPointerCasts(),
-//    Ret,
    Alloca,
     transValue(Inst->getOperand(0), BB->getParent(), BB) /* A - input */,
       ConstantInt::get(Int1Ty, Words[1]) /* S - indicator of signedness */,
@@ -2601,13 +2591,17 @@ Value *SPIRVToLLVM::transFixedPointInst(SPIRVInstruction *BI,
   if (isFuncNoUnwind())
     Fn->addFnAttr(Attribute::NoUnwind);
 
+/*  Fn->addParamAttr(0, Attribute::get(*Context,
+                                     Attribute::AttrKind::StructRet,
+                                     RetTy));*/
+
   // Words contain:
   // In<id> Literal S Literal I Literal rI Literal Q Literal O
   CallInst *RetInst = CallInst::Create(FCallee, Args, "", BB);
-  llvm::Value *RetValue = transValue(BI->getValue(605), BB->getParent(), BB);
+
  // return CallInst::Create(FCallee, Args, "", BB);
   return Alloca;
-
+//   return RetCast;
   } else {
     SmallVector<Type *, 7> ArgTys = {InTy,    Int1Ty,  Int32Ty,
                                    Int32Ty, Int32Ty, Int32Ty};
@@ -2624,7 +2618,6 @@ Value *SPIRVToLLVM::transFixedPointInst(SPIRVInstruction *BI,
   // In<id> Literal S Literal I Literal rI Literal Q Literal O
 
   CallInst *RetInst = CallInst::Create(FCallee, Args, "", BB);
-  llvm::Value *RetValue = transValue(BI->getValue(605), BB->getParent(), BB);
  // return CallInst::Create(FCallee, Args, "", BB);
   return RetInst;
 }
