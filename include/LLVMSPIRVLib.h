@@ -42,7 +42,6 @@
 #define SPIRV_H
 
 #include "LLVMSPIRVOpts.h"
-
 #include <iostream>
 #include <string>
 
@@ -107,6 +106,7 @@ std::unique_ptr<SPIRVModule> readSpirvModule(std::istream &IS,
                                              const SPIRV::TranslatorOpts &Opts,
                                              std::string &ErrMsg);
 
+
 } // End namespace SPIRV
 
 namespace llvm {
@@ -138,9 +138,9 @@ bool getSpecConstInfo(std::istream &IS,
                       std::vector<SpecConstInfoTy> &SpecConstInfo);
 
 struct SPIRVHeaderData {
-  std::uint32_t MemoryModel = 0x7fffffff; // MemoryModelMax
-  std::uint32_t AddressingModel = 0x7fffffff;
-  SPIRV::VersionNumber Version;
+  std::uint32_t MemoryModel = ~0U; // SPIRVWORD_MAX
+  std::uint32_t AddressingModel = ~0U; // SPIRVWORD_MAX
+  SPIRV::VersionNumber Version = static_cast<SPIRV::VersionNumber>(~0U);
   std::vector<std::uint32_t> Capabilities;
 };
 

@@ -4477,7 +4477,8 @@ bool llvm::readSPIRVHeader(std::istream &IS, SPIRVHeaderData &Result,
       }
     } else if (D.OpCode == OpExtension || D.OpCode == OpExtInstImport) {
       // There could be extra SPIR-V words in OpExtension or OpExtInstImport
-      D.ignore(D.WordCount-1);
+     // D.ignore(D.WordCount-1);
+      D.ignoreInstruction();
     } else {
       break;
     }
