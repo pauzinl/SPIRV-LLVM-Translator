@@ -1,6 +1,6 @@
 ; RUN: llvm-spirv %s -to-binary -o %t.spv
 ; RUN: spirv-val %t.spv
-; RUN: llvm-spirv --capabilities-info -r %t.spv | FileCheck %s --check-prefix=CHECK-INFO
+; RUN: llvm-spirv --capabilities-info %t.spv | FileCheck %s --check-prefix=CHECK-INFO
 
 ; CHECK-INFO: Capability id = 4
 ; CHECK-INFO: Capability id = 6

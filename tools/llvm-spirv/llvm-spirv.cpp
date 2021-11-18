@@ -182,8 +182,8 @@ static cl::opt<bool> SpecConstInfo(
 
 static cl::opt<bool> CapabilitiesInfo(
     "capabilities-info",
-    cl::desc("Display id of contained capabilities in SPIR-V module "
-             "memory model and addresing model"));
+    cl::desc("Display id of contained capabilities in SPIR-V module, "
+             "version, memory model and addresing model"));
 
 
 static cl::opt<SPIRV::FPContractMode> FPCMode(
@@ -658,28 +658,12 @@ int main(int Ac, char **Av) {
     return convertSPIRV();
 #endif
 
-  if (!IsReverse && !IsRegularization && !SpecConstInfo)
+  if (!IsReverse && !IsRegularization && !SpecConstInfo && !CapabilitiesInfo)
     return convertLLVMToSPIRV(Opts);
 
   if (IsReverse && IsRegularization) {
     errs() << "Cannot have both -r and -s options\n";
     return -1;
-  }
-
-  if (CapabilitiesInfo) {
-    std::ifstream IFS(InputFile, std::ios::binary);
-    SPIRVHeaderData Data;
-    std::string ErrMsg;
-    if (!readSPIRVHeader(IFS, Data, ErrMsg)) {
-      std::cout << ErrMsg << std::endl;
-      return -1;
-    }
-    for (auto i : Data.Capabilities)
-      std::cout << "Capability id = " << i << std::endl;
-    std::cout << "Version = " << static_cast<uint32_t>(Data.Version)
-              << "\nMemory model = " << Data.MemoryModel
-              << "\nAddressing model = " << Data.AddressingModel << std::endl;
-    return 0;
   }
 
   if (IsReverse)
@@ -702,6 +686,20 @@ int main(int Ac, char **Av) {
                 << ", size in bytes = " << SpecConst.second << "\n";
   }
 
+  if (CapabilitiesInfo) {
+    std::ifstream IFS(InputFile, std::ios::binary);
+    SPIRVHeaderData Data;
+    std::string ErrMsg;
+    if (!readSPIRVHeader(IFS, Data, ErrMsg)) {
+      std::cout << ErrMsg << std::endl;
+      return -1;
+    }
+    for (auto i : Data.Capabilities)
+      std::cout << "Capability id = " << i << std::endl;
+    std::cout << "Version = " << static_cast<uint32_t>(Data.Version)
+              << "\nMemory model = " << Data.MemoryModel
+              << "\nAddressing model = " << Data.AddressingModel << std::endl;
+  }
 
   return 0;
 }
