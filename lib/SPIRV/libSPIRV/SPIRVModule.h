@@ -187,6 +187,7 @@ public:
     addEntry(Entry);
     return Entry;
   }
+  virtual void InsertEntryNoId(SPIRVEntry *Entry) = 0;
   virtual SPIRVEntry *addEntry(SPIRVEntry *) = 0;
   virtual SPIRVBasicBlock *addBasicBlock(SPIRVFunction *,
                                          SPIRVId Id = SPIRVID_INVALID) = 0;

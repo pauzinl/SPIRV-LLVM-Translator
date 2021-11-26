@@ -189,6 +189,7 @@ public:
   // Object creation functions
   template <class T> void addTo(std::vector<T *> &V, SPIRVEntry *E);
   SPIRVEntry *addEntry(SPIRVEntry *E) override;
+  void InsertEntryNoId(SPIRVEntry *Entry) override;
   SPIRVBasicBlock *addBasicBlock(SPIRVFunction *, SPIRVId) override;
   SPIRVString *getString(const std::string &Str) override;
   SPIRVMemberName *addMemberName(SPIRVTypeStruct *ST, SPIRVWord MemberNumber,
@@ -684,6 +685,10 @@ void SPIRVModuleImpl::layoutEntry(SPIRVEntry *E) {
       ConstVec.push_back(static_cast<SPIRVConstant *>(E));
     break;
   }
+}
+
+void SPIRVModuleImpl::InsertEntryNoId(SPIRVEntry *Entry) {
+  EntryNoId.insert(Entry);
 }
 
 // Add an entry to the id to entry map.
