@@ -4391,7 +4391,7 @@ bool llvm::getSpecConstInfo(std::istream &IS,
 }
 
 bool llvm::readSPIRVHeader(std::istream &IS, SPIRVHeaderData &Result,
-                               std::string &ErrMsg) {
+                           std::string &ErrMsg) {
   std::unique_ptr<SPIRVModule> BM(SPIRVModule::createSPIRVModule());
   BM->setAutoAddExtensions(false);
   SPIRVDecoder D(IS, *BM);
@@ -4411,7 +4411,7 @@ bool llvm::readSPIRVHeader(std::istream &IS, SPIRVHeaderData &Result,
   while (D.getWordCountAndOpCode()) {
     if (D.OpCode == OpCapability) {
       if (D.getNextSPIRVWord(Buffer))
-      Result.Capabilities.push_back(Buffer);
+        Result.Capabilities.push_back(Buffer);
     } else if (D.OpCode == OpMemoryModel) {
       if (D.getNextSPIRVWord(Buffer)) {
         Result.AddressingModel = Buffer;
@@ -4429,8 +4429,6 @@ bool llvm::readSPIRVHeader(std::istream &IS, SPIRVHeaderData &Result,
   ErrMsg = "Memory model not specified";
   return false;
 }
-
-
 
 // clang-format off
 const StringSet<> SPIRVToLLVM::BuiltInConstFunc {

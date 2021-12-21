@@ -1912,6 +1912,11 @@ LLVMToSPIRVBase::transValueWithoutDecoration(Value *V, SPIRVBasicBlock *BB,
     return BV ? mapValue(V, BV) : nullptr;
   }
 
+  if (FenceInst *FI = dyn_cast<FenceInst>(V)) {
+    SPIRVValue *BV = transFenceInst(FI, BB);
+    return BV ? mapValue(V, BV) : nullptr;
+  }
+
   if (InlineAsm *IA = dyn_cast<InlineAsm>(V))
     if (BM->isAllowedToUseExtension(ExtensionID::SPV_INTEL_inline_assembly))
       return mapValue(V, transAsmINTEL(IA));
@@ -2716,6 +2721,35 @@ static SPIRVWord getBuiltinIdForIntrinsic(Intrinsic::ID IID) {
     assert(false && "Builtin ID requested for Unhandled intrinsic!");
     return 0;
   }
+}
+
+SPIRVValue *LLVMToSPIRVBase::transFenceInst(FenceInst *FI,
+                                            SPIRVBasicBlock *BB) {
+  SPIRVWord MemorySemantics = static_cast<SPIRVWord>(FI->getOrdering());
+  // llvm.fence can be set: Acquire, Release, AcquireRelease, or
+  // SequentiallyConsistent
+  switch (MemorySemantics) {
+  case 4:
+    MemorySemantics = 0x2;
+    break;
+  case 5:
+    MemorySemantics = 0x4;
+    break;
+  case 6:
+    MemorySemantics = 0x8;
+    break;
+  case 7:
+    MemorySemantics = 0x10;
+    break;
+  default:
+    MemorySemantics = SPIRVWORD_MAX;
+    break;
+  }
+  Module *M = FI->getParent()->getModule();
+  SPIRVValue *RetScope = transConstant(getUInt32(M, 0));
+  SPIRVValue *Val = transConstant(getUInt32(M, MemorySemantics));
+  return BM->addMemoryBarrierInst(static_cast<Scope>(RetScope->getId()),
+                                  Val->getId(), BB);
 }
 
 SPIRVValue *LLVMToSPIRVBase::transIntrinsicInst(IntrinsicInst *II,
