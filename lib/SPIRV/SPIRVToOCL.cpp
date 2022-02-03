@@ -558,10 +558,20 @@ void SPIRVToOCLBase::visitCallSPIRVPipeBuiltin(CallInst *CI, Op OC) {
 
         if (!(OC == OpReadPipe || OC == OpWritePipe ||
               OC == OpReservedReadPipe || OC == OpReservedWritePipe ||
-              OC == OpReadPipeBlockingINTEL || OC == OpWritePipeBlockingINTEL))
+              OC == OpReadPipeBlockingINTEL || OC == OpWritePipeBlockingINTEL ||
+              OC == internal::OpReadPipeExtINTEL ||
+              OC == internal::OpWritePipeExtINTEL ||
+              OC == internal::OpReadPipeBlockingExtINTEL ||
+              OC == internal::OpWritePipeBlockingExtINTEL))
           return DemangledName;
 
-        auto &P = Args[Args.size() - 3];
+        int Offset = (OC == internal::OpReadPipeExtINTEL ||
+                      OC == internal::OpWritePipeExtINTEL ||
+                      OC == internal::OpReadPipeBlockingExtINTEL ||
+                      OC == internal::OpWritePipeBlockingExtINTEL)
+                         ? 4
+                         : 3;
+        auto &P = Args[Args.size() - Offset];
         auto T = P->getType();
         assert(isa<PointerType>(T));
         auto ET = T->getPointerElementType();

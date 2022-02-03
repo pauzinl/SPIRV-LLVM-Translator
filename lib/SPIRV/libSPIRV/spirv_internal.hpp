@@ -46,6 +46,10 @@ enum InternalOp {
   IOpJointMatrixStoreINTEL = 6121,
   IOpJointMatrixMadINTEL = 6122,
   IOpArithmeticFenceINTEL = 6145,
+  IOpReadPipeExtINTEL = 6154,
+  IOpWritePipeExtINTEL = 6155,
+  IOpReadPipeBlockingExtINTEL = 6156,
+  IOpWritePipeBlockingExtINTEL = 6157,
   IOpJointMatrixWorkItemLengthINTEL = 6410,
   IOpPrev = OpMax - 2,
   IOpForward
@@ -74,7 +78,8 @@ enum InternalCapability {
   ICapBfloat16ConversionINTEL = 6115,
   ICapabilityJointMatrixINTEL = 6118,
   ICapabilityHWThreadQueryINTEL = 6134,
-  ICapFPArithmeticFenceINTEL = 6144
+  ICapFPArithmeticFenceINTEL = 6144,
+  ICapPipesINTEL = 6153
 };
 
 enum InternalFunctionControlMask { IFunctionControlOptNoneINTELMask = 0x10000 };
@@ -107,6 +112,10 @@ _SPIRV_OP(Op, TypeJointMatrixINTEL)
 _SPIRV_OP(Op, JointMatrixLoadINTEL)
 _SPIRV_OP(Op, JointMatrixStoreINTEL)
 _SPIRV_OP(Op, JointMatrixMadINTEL)
+_SPIRV_OP(Op, ReadPipeExtINTEL)
+_SPIRV_OP(Op, WritePipeExtINTEL)
+_SPIRV_OP(Op, ReadPipeBlockingExtINTEL)
+_SPIRV_OP(Op, WritePipeBlockingExtINTEL)
 _SPIRV_OP(Op, JointMatrixWorkItemLengthINTEL)
 _SPIRV_OP(Capability, HWThreadQueryINTEL)
 _SPIRV_OP(BuiltIn, SubDeviceIDINTEL)
@@ -158,6 +167,8 @@ constexpr Capability CapabilityFPArithmeticFenceINTEL =
     static_cast<Capability>(ICapFPArithmeticFenceINTEL);
 constexpr Capability CapabilityBfloat16ConversionINTEL =
     static_cast<Capability>(ICapBfloat16ConversionINTEL);
+constexpr Capability CapabilityPipesINTEL =
+    static_cast<Capability>(ICapPipesINTEL);
 
 constexpr FunctionControlMask FunctionControlOptNoneINTELMask =
     static_cast<FunctionControlMask>(IFunctionControlOptNoneINTELMask);

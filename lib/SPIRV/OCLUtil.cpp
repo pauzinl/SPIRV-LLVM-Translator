@@ -422,6 +422,12 @@ template <> void SPIRVMap<std::string, Op, SPIRVInstruction>::init() {
   _SPIRV_OP(bitfield_extract_unsigned, BitFieldUExtract)
   _SPIRV_OP(bit_reverse, BitReverse)
 #undef _SPIRV_OP
+#define _SPIRV_OP_INTERNAL(x, y) add(#x, spv::internal::Op##y);
+  _SPIRV_OP_INTERNAL(read_pipe_3_ext, ReadPipeExtINTEL)
+  _SPIRV_OP_INTERNAL(write_pipe_3_ext, WritePipeExtINTEL)
+  _SPIRV_OP_INTERNAL(read_pipe_3_bl_ext, ReadPipeBlockingExtINTEL)
+  _SPIRV_OP_INTERNAL(write_pipe_3_bl_ext, WritePipeBlockingExtINTEL)
+#undef _SPIRV_OP_INTERNAL
 }
 
 template <> void SPIRVMap<std::string, Op, OCL12Builtin>::init() {
@@ -1395,7 +1401,10 @@ bool isPipeOrAddressSpaceCastBI(const StringRef MangledName) {
          MangledName == "sub_group_commit_write_pipe" ||
          MangledName == "sub_group_commit_read_pipe" ||
          MangledName == "to_global" || MangledName == "to_local" ||
-         MangledName == "to_private";
+         MangledName == "to_private" || MangledName == "read_pipe_3_ext" ||
+         MangledName == "write_pipe_3_ext" ||
+         MangledName == "read_pipe_3_bl_ext" ||
+         MangledName == "write_pipe_3_bl_ext";
 }
 
 bool isEnqueueKernelBI(const StringRef MangledName) {

@@ -4014,6 +4014,13 @@ SPIRVInstruction *LLVMToSPIRVBase::transBuiltinToInst(StringRef DemangledName,
       !BM->isAllowedToUseExtension(ExtensionID::SPV_INTEL_blocking_pipes))
     return nullptr;
 
+  if (((internal::OpReadPipeExtINTEL <= OC &&
+        OC <= internal::OpWritePipeExtINTEL) ||
+       (internal::OpReadPipeBlockingExtINTEL <= OC &&
+        OC <= internal::OpWritePipeBlockingExtINTEL)) &&
+      !BM->isAllowedToUseExtension(ExtensionID::SPV_INTEL_pipes))
+    return nullptr;
+
   if (OpFixedSqrtINTEL <= OC && OC <= OpFixedExpINTEL)
     BM->getErrorLog().checkError(
         BM->isAllowedToUseExtension(

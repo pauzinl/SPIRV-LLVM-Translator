@@ -2551,6 +2551,26 @@ _SPIRV_OP(ReadPipeBlockingINTEL, false, 5)
 _SPIRV_OP(WritePipeBlockingINTEL, false, 5)
 #undef _SPIRV_OP
 
+class SPIRVPipesIntelInst : public SPIRVInstTemplateBase {
+protected:
+  SPIRVCapVec getRequiredCapability() const override {
+    return getVec(internal::CapabilityPipesINTEL);
+  }
+
+  llvm::Optional<ExtensionID> getRequiredExtension() const override {
+    return ExtensionID::SPV_INTEL_pipes;
+  }
+};
+
+#define _SPIRV_OP_INTERNAL(x, ...)                                             \
+  typedef SPIRVInstTemplate<SPIRVPipesIntelInst, internal::Op##x, __VA_ARGS__> \
+      SPIRV##x;
+_SPIRV_OP_INTERNAL(ReadPipeExtINTEL, true, 8)
+_SPIRV_OP_INTERNAL(WritePipeExtINTEL, true, 8)
+_SPIRV_OP_INTERNAL(ReadPipeBlockingExtINTEL, false, 6)
+_SPIRV_OP_INTERNAL(WritePipeBlockingExtINTEL, false, 6)
+#undef _SPIRV_OP_INTERNAL
+
 class SPIRVFixedPointIntelInst : public SPIRVInstTemplateBase {
 protected:
   SPIRVCapVec getRequiredCapability() const override {

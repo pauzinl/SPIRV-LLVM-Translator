@@ -185,7 +185,11 @@ inline bool isMediaBlockINTELOpcode(Op OpCode) {
 inline bool isPipeOpCode(Op OpCode) {
   unsigned OC = OpCode;
   return (OpReadPipe <= OC && OC <= OpGroupCommitWritePipe) ||
-         (OpReadPipeBlockingINTEL <= OC && OC <= OpWritePipeBlockingINTEL);
+         (OpReadPipeBlockingINTEL <= OC && OC <= OpWritePipeBlockingINTEL) ||
+         (internal::OpReadPipeExtINTEL <= OC &&
+          OC <= internal::OpWritePipeExtINTEL) ||
+         (internal::OpReadPipeBlockingExtINTEL <= OC &&
+          OC <= internal::OpWritePipeBlockingExtINTEL);
 }
 
 inline bool isSubgroupAvcINTELTypeOpCode(Op OpCode) {
