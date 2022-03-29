@@ -337,8 +337,10 @@ SPIRVType *LLVMToSPIRVBase::transType(Type *T) {
     if (!BM->isAllowedToUseExtension(
             ExtensionID::SPV_INTEL_usm_storage_classes) &&
         ((AddrSpc == SPIRAS_GlobalDevice) || (AddrSpc == SPIRAS_GlobalHost))) {
-      auto NewType =
-          PointerType::get(T->getPointerElementType(), SPIRAS_Global);
+//      auto NewType =
+ //         PointerType::get(T->getPointerElementType(), SPIRAS_Global);
+  auto NewType =
+      PointerType::getWithSamePointeeType(cast<PointerType>(T), SPIRAS_Global);
       return mapType(T, transType(NewType));
     }
     if (ST && !ST->isSized()) {
@@ -503,7 +505,8 @@ SPIRVType *LLVMToSPIRVBase::transType(Type *T) {
     SmallVector<unsigned, 4> ForwardRefs;
 
     for (unsigned I = 0, E = T->getStructNumElements(); I != E; ++I) {
-      auto *ElemTy = ST->getElementType(I);
+//      auto *ElemTy = ST->getElementType(I);
+      auto *ElemTy = ST->getStructElementType(I);
       if ((isa<StructType>(ElemTy) || isa<ArrayType>(ElemTy) ||
            isa<VectorType>(ElemTy) || isa<PointerType>(ElemTy)) &&
           recursiveType(ST, ElemTy))
@@ -4839,6 +4842,7 @@ LLVMToSPIRVBase::transBuiltinToInstWithoutDecoration(Op OC, CallInst *CI,
       std::vector<SPIRVWord> SPArgs;
       for (size_t I = 0, E = Args.size(); I != E; ++I) {
         assert((!isFunctionPointerType(Args[I]->getType()) ||
+ //       assert((!isFunctionPointerType(cast<Function>(Args[I])) ||
                 isa<Function>(Args[I])) &&
                "Invalid function pointer argument");
         SPArgs.push_back(SPI->isOperandLiteral(I)

@@ -362,7 +362,8 @@ private:
       Type *T = G.getInitializer()->getType();
       if (!T->isPointerTy())
         continue;
-      T = cast<PointerType>(T)->getPointerElementType();
+     // T = cast<PointerType>(T)->getPointerElementType();
+      T = G.getValueType();
       if (!T->isStructTy())
         continue;
       StringRef STName = cast<StructType>(T)->getName();

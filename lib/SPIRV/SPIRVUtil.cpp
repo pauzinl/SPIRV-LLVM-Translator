@@ -643,8 +643,10 @@ bool containsUnsignedAtomicType(StringRef Name) {
       Name[Loc + strlen(kMangledName::AtomicPrefixIncoming)]);
 }
 
+//bool isFunctionPointerType( Value *T) {
 bool isFunctionPointerType(Type *T) {
   if (isa<PointerType>(T) && isa<FunctionType>(T->getPointerElementType())) {
+//  if (isa<Function>(T) && isa<FunctionType>(cast<Function>(T)->getFunctionType())) {
     return true;
   }
   return false;
@@ -655,6 +657,7 @@ bool hasFunctionPointerArg(Function *F, Function::arg_iterator &AI) {
   for (auto AE = F->arg_end(); AI != AE; ++AI) {
     LLVM_DEBUG(dbgs() << "[hasFuncPointerArg] " << *AI << '\n');
     if (isFunctionPointerType(AI->getType())) {
+ //   if (isFunctionPointerType(AI)) {
       return true;
     }
   }
@@ -1158,6 +1161,7 @@ static SPIR::RefParamType transTypeDesc(Type *Ty,
 
   if (Ty->isPointerTy()) {
     auto ET = Ty->getPointerElementType();
+   // ET = nullptr;
     SPIR::ParamType *EPT = nullptr;
     if (isa<FunctionType>(ET)) {
       assert(isVoidFuncTy(cast<FunctionType>(ET)) && "Not supported");
@@ -1789,7 +1793,8 @@ bool lowerBuiltinVariableToCall(GlobalVariable *GV,
   Module *M = GV->getParent();
   LLVMContext &C = M->getContext();
   std::string FuncName = GV->getName().str();
-  Type *GVTy = GV->getType()->getPointerElementType();
+ // Type *GVTy = GV->getType()->getPointerElementType();
+  Type *GVTy = /*dyn_cast<StructType>*/(GV->getValueType());
   Type *ReturnTy = GVTy;
   // Some SPIR-V builtin variables are translated to a function with an index
   // argument.

@@ -2234,8 +2234,12 @@ Value *SPIRVToLLVM::transValueWithoutDecoration(SPIRVValue *BV, Function *F,
     SPIRVFunctionPointerCallINTEL *BC =
         static_cast<SPIRVFunctionPointerCallINTEL *>(BV);
     auto *V = transValue(BC->getCalledValue(), F, BB);
+    //V = nullptr;
+//    auto *RetTy = F->getFunctionType();
     auto Call = CallInst::Create(
-        cast<FunctionType>(V->getType()->getPointerElementType()), V,
+        cast<FunctionType>(V->getType()->getPointerElementType())
+//        cast<FunctionType>(V->getType())
+, V,
         transValue(BC->getArgumentValues(), F, BB), BC->getName(), BB);
     transFunctionPointerCallArgumentAttributes(BV, Call);
     // Assuming we are calling a regular device function

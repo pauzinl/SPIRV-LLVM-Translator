@@ -351,6 +351,7 @@ void SPIRVRegularizeLLVMBase::expandVEDWithSYCLTypeSRetArg(Function *F) {
         Args.erase(Args.begin());
         auto *SRetPtrTy = cast<PointerType>(CI->getOperand(0)->getType());
         auto *ET = SRetPtrTy->getPointerElementType();
+        //ET = nullptr;
         RetTy = cast<StructType>(ET)->getElementType(0);
         OldCall = CI;
         return Name;
@@ -586,8 +587,11 @@ bool SPIRVRegularizeLLVMBase::regularize() {
           Type *SrcTy = ASCast->getSrcTy();
           if (DestTy->getPointerElementType() !=
               SrcTy->getPointerElementType()) {
+            //PointerType *InterTy =
+           //     PointerType::get(DestTy->getPointerElementType(),
+           //                      SrcTy->getPointerAddressSpace());
             PointerType *InterTy =
-                PointerType::get(DestTy->getPointerElementType(),
+              PointerType::getWithSamePointeeType(cast<PointerType>(DestTy),
                                  SrcTy->getPointerAddressSpace());
             BitCastInst *NewBCast = new BitCastInst(
                 ASCast->getPointerOperand(), InterTy, /*NameStr=*/"", ASCast);
@@ -678,6 +682,7 @@ void SPIRVRegularizeLLVMBase::lowerFuncPtr(Function *F, Op OC) {
       [=, &InvokeFuncPtrs](CallInst *CI, std::vector<Value *> &Args) {
         for (auto &I : Args) {
           if (isFunctionPointerType(I->getType())) {
+//          if (isFunctionPointerType(cast<Function>(I))) {
             InvokeFuncPtrs.insert(I);
             I = removeCast(I);
           }

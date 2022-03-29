@@ -716,6 +716,7 @@ bool isVoidFuncTy(FunctionType *FT);
 
 /// \returns true if \p T is a function pointer type.
 bool isFunctionPointerType(Type *T);
+//bool isFunctionPointerType(Value *T);
 
 /// \returns true if function \p F has function pointer type argument.
 /// \param AI points to the function pointer type argument if returns true.
